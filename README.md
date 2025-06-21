@@ -29,30 +29,14 @@ cd ip-speed
 4. 构建设置选择 "None"
 5. 点击部署
 
-### 方式三：Docker 部署
-```bash
-# 克隆项目
-git clone https://github.com/BAYUEQI/ip-speed.git
-cd ip-speed
 
-# 一键启动
-docker-compose up -d
-
-# 查看日志
-docker-compose logs -f
-
-# 停止服务
-docker-compose down
-```
-
-访问：http://localhost:3000
 
 ## 💖 赞助项目
 
 如果这个项目对您有帮助，可以请我喝杯咖啡！您的支持是我持续维护和开发新功能的动力。
 
 <p align="center">
-  <img src="assets/wechat_sponsor.png" width="250">
+  <img src="assets/wechat_sponsor.jpg" width="250">
 </p>
 
 ## 📁 项目结构
