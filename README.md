@@ -29,16 +29,6 @@ cd ip-speed
 4. 构建设置选择 "None"
 5. 点击部署
 
-
-
-## 💖 赞助项目
-
-如果这个项目对您有帮助，可以请我喝杯咖啡！您的支持是我持续维护和开发新功能的动力。
-
-<p align="center">
-  <img src="assets/wechat_sponsor.jpg" width="250">
-</p>
-
 ## 📁 项目结构
 ```
 ip-speed/
@@ -51,6 +41,13 @@ ip-speed/
 
 ## 📄 许可证
 MIT License - 可自由使用和修改
+## 💖 赞助项目
+
+如果这个项目对您有帮助，可以请我喝杯咖啡！您的支持是我持续维护和开发新功能的动力。
+
+<p align="center">
+  <img src="assets/wechat_sponsor.jpg" width="250">
+</p>
 
 ## 🔗 相关项目
 - [IPDB](https://github.com/ymyuuu/IPDB) - Cloudflare反代优选IP库
