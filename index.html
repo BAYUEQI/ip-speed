@@ -41,6 +41,7 @@
                     <label><input type="checkbox" name="ipType" value="proxy"><span>Cloudflare 反代 IP 地址列表</span></label>
                     <label><input type="checkbox" name="ipType" value="bestcf"><span>优选 Cloudflare 官方 IP</span></label>
                     <label><input type="checkbox" name="ipType" value="bestproxy"><span>优选 Cloudflare 反代 IP</span></label>
+                    <label><input type="checkbox" name="ipType" value="customfile"><span>自定义文件导入</span></label>
                 </div>
                 
                 <h3><i class="fas fa-cog"></i> 附加选项</h3>
@@ -56,7 +57,7 @@
                 </div>
                 <p style="font-size: 12px; color: #666; margin-top: 5px;">
                     <i class="fas fa-info-circle"></i> 
-                    注意：只有选择"优选 Cloudflare 官方 IP"或"优选 Cloudflare 反代 IP"才能显示IP地理位置信息
+                    注意：只有选择"优选 Cloudflare 官方 IP"、"优选 Cloudflare 反代 IP"或"自定义文件导入"的不带端口和其它文字信息的ipv4才能显示IP地理位置信息
                 </p>
                 
                 <div id="downloadSettings" style="display: none; margin-top: 15px;">
@@ -77,6 +78,27 @@
                     <div id="customProxyInput" style="display: none; margin-top: 10px;">
                         <input type="text" id="customProxyUrl" placeholder="输入github自定义代理URL">
                         <div class="helper-text">如何搭建请详细看<a href="https://github.com/BAYUEQI/astrbot2github" target="_blank">https://github.com/BAYUEQI/astrbot2github</a></div>
+                    </div>
+                </div>
+                
+                <!-- 文件导入区域 -->
+                <div id="fileImportSection" style="display: none; margin-top: 15px;">
+                    <h3><i class="fas fa-file-upload"></i> 文件导入设置</h3>
+                    <div class="file-upload-container">
+                        <input type="file" id="ipFileInput" accept=".txt,.csv,.json" style="display: none;">
+                        <button type="button" id="selectFileBtn" class="file-select-btn">
+                            <i class="fas fa-folder-open"></i> 选择文件
+                        </button>
+                        <span id="selectedFileName" class="selected-file-name">未选择文件</span>
+                    </div>
+                    <div class="file-format-info">
+                        <p><i class="fas fa-info-circle"></i> 支持的文件格式：</p>
+                        <ul>
+                            <li><strong>文本文件 (.txt)</strong>：每行一个IP地址</li>
+                            <li><strong>CSV文件 (.csv)</strong>：第一列为IP地址</li>
+                            <li><strong>JSON文件 (.json)</strong>：包含IP地址数组</li>
+                        </ul>
+                        <p><i class="fas fa-exclamation-triangle"></i> 注意：文件大小限制为1MB，最多支持1000个IP地址</p>
                     </div>
                 </div>
                 
