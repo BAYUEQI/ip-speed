@@ -2,7 +2,6 @@
 
 > 🚀 纯前端 Cloudflare IP 批量查询与网络测速工具
 
-[![Deploy to Cloudflare Pages](https://deploy.cloudflare.com/button.svg)](https://deploy.cloudflare.com/?url=https://github.com/BAYUEQI/ip-speed)
 
 ## ✨ 功能特性
 
