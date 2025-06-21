@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  ip-speed:
+    build: .
+    container_name: ip-speed
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # 可选：如果需要持久化数据，可以挂载卷
+      # - ./data:/app/data
+    networks:
+      - ip-speed-network
+
+networks:
+  ip-speed-network:
+    driver: bridge 
