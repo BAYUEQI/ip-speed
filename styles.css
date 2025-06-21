@@ -1611,14 +1611,174 @@ button:hover i {
 /* 超小屏幕上的表格样式 */
 @media (max-width: 480px) {
     .ip-details-table {
-        font-size: 13px;
+        font-size: 12px;
     }
     
     .ip-details-table td {
-        padding: 8px 10px;
+        padding: 6px 4px;
     }
     
     .ip-details-table td:first-child {
-        width: 90px;
+        font-size: 11px;
+    }
+}
+
+/* 文件导入相关样式 */
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: rgba(67, 97, 238, 0.05);
+    border-radius: var(--radius);
+    border: 2px dashed var(--border-color);
+    transition: var(--transition);
+}
+
+.file-upload-container:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(67, 97, 238, 0.08);
+}
+
+.file-select-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+.file-select-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+}
+
+.file-select-btn:active {
+    transform: translateY(0);
+}
+
+.selected-file-name {
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    word-break: break-all;
+}
+
+.selected-file-name.has-file {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.file-format-info {
+    background-color: rgba(76, 201, 240, 0.1);
+    border: 1px solid rgba(76, 201, 240, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.file-format-info p {
+    margin: 0 0 10px 0;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.file-format-info p:last-child {
+    margin-bottom: 0;
+    color: var(--warning-color);
+    font-weight: 600;
+}
+
+.file-format-info ul {
+    margin: 10px 0 10px 20px;
+    padding: 0;
+}
+
+.file-format-info li {
+    margin-bottom: 5px;
+    color: var(--light-text);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.file-format-info li:last-child {
+    margin-bottom: 0;
+}
+
+.file-format-info strong {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .file-upload-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .file-select-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+    
+    .selected-file-name {
+        text-align: center;
+        font-size: 13px;
+    }
+    
+    .file-format-info {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .file-format-info ul {
+        margin-left: 15px;
+    }
+    
+    .file-format-info li {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .file-upload-container {
+        padding: 10px;
+    }
+    
+    .file-select-btn {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    
+    .selected-file-name {
+        font-size: 12px;
+    }
+    
+    .file-format-info {
+        padding: 10px;
+    }
+    
+    .file-format-info p {
+        font-size: 13px;
+    }
+    
+    .file-format-info li {
+        font-size: 11px;
     }
 } 
