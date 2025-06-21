@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4361ee">
+    <title>ip-speed - IP查询与测速工具</title>
+    <meta name="description" content="多功能API工具箱，提供Cloudflare IP查询和网络测速功能">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <ul class="bg-bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+    <div class="container">
+        <h1><i class="fas fa-tools"></i> ip-speed</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="ipdb"><i class="fas fa-network-wired"></i> IP查询</button>
+            <button class="tab-btn" data-tab="spurl"><i class="fas fa-tachometer-alt"></i> 网络测速</button>
+        </div>
+        
+        <div class="tab-content" id="ipdb-content">
+            <h2><i class="fas fa-search"></i> IP查询</h2>
+            <div class="options">
+                <h3><i class="fas fa-filter"></i> 选择 IP 类型</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="ipType" value="cfv4"><span>Cloudflare IPv4 地址列表</span></label>
+                    <label><input type="checkbox" name="ipType" value="cfv6"><span>Cloudflare IPv6 地址列表</span></label>
+                    <label><input type="checkbox" name="ipType" value="proxy"><span>Cloudflare 反代 IP 地址列表</span></label>
+                    <label><input type="checkbox" name="ipType" value="bestcf"><span>优选 Cloudflare 官方 IP</span></label>
+                    <label><input type="checkbox" name="ipType" value="bestproxy"><span>优选 Cloudflare 反代 IP</span></label>
+                </div>
+                
+                <h3><i class="fas fa-cog"></i> 附加选项</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="downloadFile"><span>下载为文件</span></label>
+                    <label><input type="checkbox" id="useProxy"><span>使用代理解决跨域问题</span></label>
+                </div>
+
+                <h3><i class="fas fa-info-circle"></i> 显示IP信息</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="showIPDetails"><span>显示IP详细信息</span></label>
+                    <label><input type="checkbox" id="showSimpleInfo"><span>显示IP简略信息</span></label>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                    <i class="fas fa-info-circle"></i> 
+                    注意：只有选择"优选 Cloudflare 官方 IP"或"优选 Cloudflare 反代 IP"才能显示IP地理位置信息
+                </p>
+                
+                <div id="downloadSettings" style="display: none; margin-top: 15px;">
+                    <h3><i class="fas fa-download"></i> 下载设置</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="downloadType" value="single" checked><span>合并为单个文件（有分类标识）</span></label>
+                        <label><input type="radio" name="downloadType" value="multiple"><span>每种类型生成独立文件</span></label>
+                    </div>
+                </div>
+                
+                <div id="proxySettings" style="display: none; margin-top: 15px;">
+                    <h3><i class="fas fa-shield-alt"></i> 代理设置</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="proxyType" value="cors-anywhere" checked><span>CORS Anywhere</span></label>
+                        <label><input type="radio" name="proxyType" value="allorigins"><span>AllOrigins</span></label>
+                        <label><input type="radio" name="proxyType" value="custom"><span>自定义代理</span></label>
+                    </div>
+                    <div id="customProxyInput" style="display: none; margin-top: 10px;">
+                        <input type="text" id="customProxyUrl" placeholder="输入github自定义代理URL">
+                        <div class="helper-text">如何搭建请详细看<a href="https://github.com/BAYUEQI/astrbot2github" target="_blank">https://github.com/BAYUEQI/astrbot2github</a></div>
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button id="queryBtn"><i class="fas fa-search"></i> 查询</button>
+                </div>
+            </div>
+            
+            <div class="result-container">
+                <h3><i class="fas fa-list-alt"></i> 查询结果 <span class="result-count" id="resultCount"></span></h3>
+                <div class="loading" id="loading" style="display: none;">查询中，请稍候...</div>
+                <pre id="result"></pre>
+            </div>
+            
+            <div class="tips">
+                <h3><i class="fas fa-lightbulb"></i> 使用提示</h3>
+                <ul>
+                    <li>如果直接查询显示"获取数据出错"，请尝试选择"使用代理解决跨域问题"选项</li>
+                    <li>选择"下载为文件"选项可以将查询结果保存为本地文件，但同样需要解决跨域问题</li>
+                    <li>勾选"显示IP详细信息"可以查看每个IP的地理位置、ISP、时区等完整信息</li>
+                    <li>推荐使用Chrome、Edge或Firefox浏览器获得最佳体验</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="spurl-content" style="display: none;">
+            <h2><i class="fas fa-bolt"></i> 网络测速</h2>
+            <div class="options">
+                <h3><i class="fas fa-file-download"></i> 下载大小设置</h3>
+                <div class="input-group">
+                    <input type="number" id="downloadSize" min="1" value="10" class="size-input">
+                    <select id="sizeUnit" class="size-unit">
+                        <option value="">字节(B)</option>
+                        <option value="kb" selected>千字节(KB)</option>
+                        <option value="mb">兆字节(MB)</option>
+                        <option value="gb">千兆字节(GB)</option>
+                    </select>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="showProgressSpurl"><span>显示下载进度</span></label>
+                </div>
+                
+                <div class="button-container">
+                    <button id="startSpeedTest"><i class="fas fa-play"></i> 开始测速</button>
+                    <button id="stopSpeedTest" style="display: none;"><i class="fas fa-stop"></i> 停止测速</button>
+                </div>
+            </div>
+            
+            <div class="result-container">
+                <h3><i class="fas fa-chart-bar"></i> 测速结果</h3>
+                <div class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+                <div class="speed-result" id="speedResult">
+                    <div class="result-item">
+                        <span><i class="fas fa-link"></i> 下载链接:</span>
+                        <span id="downloadUrl">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span><i class="fas fa-file"></i> 文件大小:</span>
+                        <span id="fileSize">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span><i class="fas fa-tachometer-alt"></i> 下载速度:</span>
+                        <span id="downloadSpeed">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span><i class="fas fa-clock"></i> 下载时间:</span>
+                        <span id="downloadTime">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tips">
+                <h3><i class="fas fa-lightbulb"></i> 使用提示</h3>
+                <ul>
+                    <li>推荐先测试小文件(如10KB)，确认连接正常后再测试大文件</li>
+                    <li>文件大小越大，测试结果越准确，但耗时也会更长</li>
+                    <li>网络波动可能导致测速结果不准确，建议测试多次取平均值</li>
+                    <li>超过1GB的文件可能导致浏览器内存占用过高，请谨慎使用</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p class="copyright"><i class="fas fa-code-branch"></i> <a href="https://github.com/BAYUEQI/ip-speed" target="_blank">GitHub: BAYUEQI/ip-speed</a> | <i class="fas fa-copyright"></i> 2025 ip-speed - 保留所有权利</p>
+        <p class="attribution">此项目基于 <a href="https://github.com/ymyuuu/IPDB" target="_blank">IPDB</a> 和 <a href="https://github.com/ymyuuu/Spurl-API" target="_blank">Spurl-API</a> | 由 <a href="https://github.com/ymyuuu" target="_blank">ymyuuu</a> 开发的优质API工具</p>
+    </footer>
+    
+    <!-- 返回顶部按钮 -->
+    <button id="backToTop" class="back-to-top" title="返回顶部"><i class="fas fa-arrow-up"></i></button>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
