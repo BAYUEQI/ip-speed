@@ -57,6 +57,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const proxyTypeRadios = document.querySelectorAll('input[name="proxyType"]');
     const downloadTypeRadios = document.querySelectorAll('input[name="downloadType"]');
     
+    // 文件导入相关元素
+    const fileImportSection = document.getElementById('fileImportSection');
+    const ipFileInput = document.getElementById('ipFileInput');
+    const selectFileBtn = document.getElementById('selectFileBtn');
+    const selectedFileName = document.getElementById('selectedFileName');
+    
+    // 存储导入的IP数据
+    let importedIPs = [];
+    
     // 显示/隐藏代理设置
     useProxyCheckbox.addEventListener('change', function() {
         proxySettings.style.display = this.checked ? 'block' : 'none';
@@ -67,12 +76,170 @@ document.addEventListener('DOMContentLoaded', function() {
         downloadSettings.style.display = this.checked ? 'block' : 'none';
     });
     
+    // 显示/隐藏文件导入设置
+    ipTypeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.value === 'customfile') {
+                fileImportSection.style.display = this.checked ? 'block' : 'none';
+                if (!this.checked) {
+                    // 取消选择时清空文件数据
+                    importedIPs = [];
+                    selectedFileName.textContent = '未选择文件';
+                    selectedFileName.classList.remove('has-file');
+                    ipFileInput.value = '';
+                }
+            }
+        });
+    });
+    
+    // 文件选择按钮点击事件
+    selectFileBtn.addEventListener('click', function() {
+        ipFileInput.click();
+    });
+    
+    // 文件输入变化事件
+    ipFileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFileUpload(file);
+        }
+    });
+    
     // 显示/隐藏自定义代理输入框
     proxyTypeRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             customProxyInput.style.display = this.value === 'custom' ? 'block' : 'none';
         });
     });
+    
+    // 处理文件上传
+    async function handleFileUpload(file) {
+        // 检查文件大小（限制1MB）
+        if (file.size > 1024 * 1024) {
+            alert('文件大小不能超过1MB');
+            return;
+        }
+        
+        // 检查文件类型
+        const allowedTypes = ['.txt', '.csv', '.json'];
+        const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+        if (!allowedTypes.includes(fileExtension)) {
+            alert('只支持 .txt、.csv、.json 格式的文件');
+            return;
+        }
+        
+        try {
+            const content = await readFileContent(file);
+            const ips = parseIPsFromContent(content, fileExtension);
+            
+            if (ips.length === 0) {
+                alert('文件中没有找到有效的IP地址');
+                return;
+            }
+            
+            if (ips.length > 1000) {
+                alert('IP地址数量不能超过1000个，当前文件包含 ' + ips.length + ' 个IP');
+                return;
+            }
+            
+            // 更新UI
+            importedIPs = ips;
+            selectedFileName.textContent = `${file.name} (${ips.length} 个IP)`;
+            selectedFileName.classList.add('has-file');
+            
+            console.log(`成功导入 ${ips.length} 个IP地址`);
+            
+        } catch (error) {
+            alert('文件读取失败: ' + error.message);
+            console.error('文件读取错误:', error);
+        }
+    }
+    
+    // 读取文件内容
+    function readFileContent(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(new Error('文件读取失败'));
+            reader.readAsText(file, 'UTF-8');
+        });
+    }
+    
+    // 从文件内容中解析IP地址
+    function parseIPsFromContent(content, fileExtension) {
+        const ips = new Set();
+        
+        switch (fileExtension) {
+            case '.txt':
+                // 文本文件：每行一个IP
+                const lines = content.split('\n');
+                lines.forEach(line => {
+                    const ip = line.trim();
+                    if (isValidIP(ip)) {
+                        ips.add(ip);
+                    }
+                });
+                break;
+                
+            case '.csv':
+                // CSV文件：第一列为IP地址
+                const csvLines = content.split('\n');
+                csvLines.forEach(line => {
+                    const columns = line.split(',');
+                    if (columns.length > 0) {
+                        const ip = columns[0].trim().replace(/"/g, '');
+                        if (isValidIP(ip)) {
+                            ips.add(ip);
+                        }
+                    }
+                });
+                break;
+                
+            case '.json':
+                // JSON文件：包含IP地址数组
+                try {
+                    const jsonData = JSON.parse(content);
+                    if (Array.isArray(jsonData)) {
+                        jsonData.forEach(item => {
+                            const ip = typeof item === 'string' ? item : (item.ip || item.address || '');
+                            if (isValidIP(ip)) {
+                                ips.add(ip);
+                            }
+                        });
+                    } else if (jsonData.ips && Array.isArray(jsonData.ips)) {
+                        jsonData.ips.forEach(ip => {
+                            if (isValidIP(ip)) {
+                                ips.add(ip);
+                            }
+                        });
+                    } else if (jsonData.addresses && Array.isArray(jsonData.addresses)) {
+                        jsonData.addresses.forEach(ip => {
+                            if (isValidIP(ip)) {
+                                ips.add(ip);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    throw new Error('JSON格式错误');
+                }
+                break;
+        }
+        
+        return Array.from(ips);
+    }
+    
+    // 验证IP地址格式
+    function isValidIP(ip) {
+        if (!ip || typeof ip !== 'string') return false;
+        
+        // IPv4 正则表达式
+        const ipv4Regex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        
+        // IPv6 正则表达式（简化版）
+        const ipv6Regex = /^(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^::1$|^::$/;
+        
+        return ipv4Regex.test(ip) || ipv6Regex.test(ip);
+    }
     
     // 使用代理获取数据
     async function fetchWithProxy(url, proxyType, customProxy) {
@@ -362,6 +529,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // 检查自定义文件导入
+        if (selectedTypes.includes('customfile')) {
+            if (importedIPs.length === 0) {
+                alert('请先选择并导入包含IP地址的文件！');
+                return;
+            }
+        }
+        
         // 验证自定义代理URL格式
         let customProxy = '';
         if (useProxyCheckbox.checked) {
@@ -388,7 +563,8 @@ document.addEventListener('DOMContentLoaded', function() {
             'cfv6': 'Cloudflare IPv6 地址列表',
             'proxy': 'Cloudflare 反代 IP 地址列表',
             'bestcf': '优选 Cloudflare 官方 IP',
-            'bestproxy': '优选 Cloudflare 反代 IP'
+            'bestproxy': '优选 Cloudflare 反代 IP',
+            'customfile': '自定义文件导入'
         };
         
         let formattedResult = '';
@@ -406,25 +582,31 @@ document.addEventListener('DOMContentLoaded', function() {
             // 为每种选择的类型单独发起请求
             for (const type of selectedTypes) {
                 try {
-                    // 构建单类型API URL
-                    const baseUrl = 'https://ipdb.api.030101.xyz/';
-                    const downloadParam = 'false'; // 不下载文件
-                    
-                    const url = `${baseUrl}?type=${type}&down=${downloadParam}`;
-                    
-                    // 根据是否使用代理决定请求方式
                     let data;
-                    if (useProxyCheckbox.checked) {
-                        // 使用选择的代理方式
-                        const selectedProxyType = document.querySelector('input[name="proxyType"]:checked').value;
-                        data = await fetchWithProxy(url, selectedProxyType, customProxy);
+                    
+                    if (type === 'customfile') {
+                        // 处理自定义文件导入
+                        data = importedIPs.join('\n');
                     } else {
-                        // 直接请求API
-                        const response = await fetch(url);
-                        if (!response.ok) {
-                            throw new Error(`HTTP错误: ${response.status}`);
+                        // 构建单类型API URL
+                        const baseUrl = 'https://ipdb.api.030101.xyz/';
+                        const downloadParam = 'false'; // 不下载文件
+                        
+                        const url = `${baseUrl}?type=${type}&down=${downloadParam}`;
+                        
+                        // 根据是否使用代理决定请求方式
+                        if (useProxyCheckbox.checked) {
+                            // 使用选择的代理方式
+                            const selectedProxyType = document.querySelector('input[name="proxyType"]:checked').value;
+                            data = await fetchWithProxy(url, selectedProxyType, customProxy);
+                        } else {
+                            // 直接请求API
+                            const response = await fetch(url);
+                            if (!response.ok) {
+                                throw new Error(`HTTP错误: ${response.status}`);
+                            }
+                            data = await response.text();
                         }
-                        data = await response.text();
                     }
                     
                     // 存储每种类型的结果
@@ -438,12 +620,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         // 如果需要显示IP详细信息
                         if (showIPDetails) {
                             // 检查是否选择了允许显示详细信息的IP类型
-                            const allowedTypes = ['bestcf', 'bestproxy'];
+                            const allowedTypes = ['bestcf', 'bestproxy', 'customfile'];
                             const hasAllowedType = selectedTypes.some(type => allowedTypes.includes(type));
                             
                             if (!hasAllowedType) {
                                 // 如果没有选择允许的类型，显示提示信息
-                                processedData = `【${typeDisplayName}】:\n${processedData}\n\n⚠️ 提示：只有选择"优选 Cloudflare 官方 IP"或"优选 Cloudflare 反代 IP"才能显示IP详细信息`;
+                                processedData = `【${typeDisplayName}】:\n${processedData}\n\n⚠️ 提示：只有选择"优选 Cloudflare 官方 IP"、"优选 Cloudflare 反代 IP"或"自定义文件导入"才能显示IP详细信息`;
                             } else {
                                 // 检查当前类型是否允许显示详细信息
                                 const isCurrentTypeAllowed = allowedTypes.includes(type);
@@ -504,12 +686,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         } else if (showSimpleInfo) {
                             // 检查是否选择了允许显示详细信息的IP类型
-                            const allowedTypes = ['bestcf', 'bestproxy'];
+                            const allowedTypes = ['bestcf', 'bestproxy', 'customfile'];
                             const hasAllowedType = selectedTypes.some(type => allowedTypes.includes(type));
                             
                             if (!hasAllowedType) {
                                 // 如果没有选择允许的类型，显示提示信息
-                                processedData = `【${typeDisplayName}】:\n${processedData}\n\n⚠️ 提示：只有选择"优选 Cloudflare 官方 IP"或"优选 Cloudflare 反代 IP"才能显示IP简略信息`;
+                                processedData = `【${typeDisplayName}】:\n${processedData}\n\n⚠️ 提示：只有选择"优选 Cloudflare 官方 IP"、"优选 Cloudflare 反代 IP"或"自定义文件导入"才能显示IP简略信息`;
                             } else {
                                 // 检查当前类型是否允许显示详细信息
                                 const isCurrentTypeAllowed = allowedTypes.includes(type);
@@ -620,11 +802,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             // 如果需要显示IP详细信息或简略信息
                             if (showIPDetails || showSimpleInfo) {
                                 // 检查当前类型是否允许显示详细信息
-                                const allowedTypes = ['bestcf', 'bestproxy'];
+                                const allowedTypes = ['bestcf', 'bestproxy', 'customfile'];
                                 const isCurrentTypeAllowed = allowedTypes.includes(type);
                                 
                                 if (isCurrentTypeAllowed) {
-                                    // 优选类型：需要处理HTML表格
+                                    // 优选类型或自定义文件：需要处理HTML表格
                                     // 从formattedResult中提取对应类型的内容
                                     const tempDiv = document.createElement('div');
                                     tempDiv.innerHTML = formattedResult;
@@ -655,7 +837,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 downloadContent = `【${typeDisplayName}】:\n${typeResults[type]}`;
                             }
                             
-                            downloadTextAsFile(`${type}.txt`, downloadContent);
+                            // 为自定义文件导入使用特殊的文件名
+                            const fileName = type === 'customfile' ? 'custom-imported-ips' : type;
+                            downloadTextAsFile(`${fileName}.txt`, downloadContent);
                         }
                     }
                 }
@@ -1129,3 +1313,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
