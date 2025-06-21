@@ -890,17 +890,87 @@ document.addEventListener('DOMContentLoaded', function() {
     function countIPs(text) {
         if (!text) return 0;
         
-        // 简单地按行分割并计数非空行
-        const lines = text.split('\n');
         let count = 0;
         
-        for (const line of lines) {
-            // 跳过空行和类型标题行 (以【开头的行)
-            if (line.trim() && !line.startsWith('【')) {
-                count++;
+        // 检查是否包含HTML表格（IP详细信息或简略信息模式）
+        if (text.includes('<table') || text.includes('<div class="ip-details-section"')) {
+            // 创建临时div来解析HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            
+            // 查找所有IP详细信息表格
+            const sections = tempDiv.querySelectorAll('.ip-details-section');
+            sections.forEach(section => {
+                const table = section.querySelector('.ip-details-table');
+                if (table) {
+                    // 检查是否有表头（简略信息表格）
+                    const thead = table.querySelector('thead');
+                    if (thead) {
+                        // 简略信息表格：计算tbody中的行数
+                        const tbody = table.querySelector('tbody');
+                        if (tbody) {
+                            const rows = tbody.querySelectorAll('tr');
+                            count += rows.length;
+                        }
+                    } else {
+                        // 详细信息表格：计算包含"IP地址"标签的行数
+                        const rows = table.querySelectorAll('tr');
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll('td');
+                            if (cells.length >= 2) {
+                                const firstCell = cells[0].textContent.trim();
+                                // 只统计包含"IP地址"标签的行，避免重复计算
+                                if (firstCell === 'IP地址') {
+                                    count++;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+            
+            // 移除所有HTML表格部分，获取剩余的纯文本内容
+            const tempDivForText = document.createElement('div');
+            tempDivForText.innerHTML = text;
+            
+            // 移除所有表格部分
+            const allSections = tempDivForText.querySelectorAll('.ip-details-section');
+            allSections.forEach(section => section.remove());
+            
+            // 获取剩余的纯文本内容并统计
+            const remainingText = tempDivForText.textContent || tempDivForText.innerText || '';
+            if (remainingText.trim()) {
+                const lines = remainingText.split('\n');
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    // 跳过空行、类型标题、提示行、分隔行
+                    if (
+                        trimmed &&
+                        !trimmed.startsWith('【') &&
+                        !trimmed.startsWith('⚠️') &&
+                        !trimmed.endsWith('：') && // 注意是中文冒号
+                        !trimmed.endsWith(':')
+                    ) {
+                        count++;
+                    }
+                }
+            }
+        } else {
+            // 纯文本格式
+            const lines = text.split('\n');
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (
+                    trimmed &&
+                    !trimmed.startsWith('【') &&
+                    !trimmed.startsWith('⚠️') &&
+                    !trimmed.endsWith('：') &&
+                    !trimmed.endsWith(':')
+                ) {
+                    count++;
+                }
             }
         }
-        
         return count;
     }
     
