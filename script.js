@@ -691,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             if (!hasAllowedType) {
                                 // 如果没有选择允许的类型，显示提示信息
-                                processedData = `【${typeDisplayName}】:\n${processedData}\n\n⚠️ 提示：只有选择"优选 Cloudflare 官方 IP"、"优选 Cloudflare 反代 IP"或"自定义文件导入"才能显示IP简略信息`;
+                                processedData = `【${typeDisplayName}】:\n${processedData}\n\n⚠️ 提示：只有选择"优选 Cloudflare 官方 IP"、"优选 Cloudflare 反代 IP"或"自定义文件导入"的不带端口和其它文字信息的ipv4才能显示IP简略信息`;
                             } else {
                                 // 检查当前类型是否允许显示详细信息
                                 const isCurrentTypeAllowed = allowedTypes.includes(type);
